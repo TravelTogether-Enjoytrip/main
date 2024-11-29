@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssafy.enjoytrip.group.mapper.GroupMapper">
+	<resultMap type="groupDto" id="group">
+		<result column="groupId" property="groupId"></result>
+		<result column="groupName" property="groupName"></result>
+	</resultMap>
+	
+	
+	
+	<insert id = "makeGroup" parameterType="groupDto" useGeneratedKeys="true"
+        keyProperty="groupId" keyColumn="groupId">
+		insert into `group` (groupName)
+		values (#{groupName});
+		
+		insert into usergrouprelationship (userId, groupId)
+		values 
+		<foreach collection="groupMembers" item="userId" separator=",">
+			(#{userId}, (SELECT MAX(groupId) FROM `group`))
+	    </foreach>
+	</insert>
+	
+	<insert id = "modifyGroup" parameterType="groupDto">
+        INSERT INTO usergrouprelationship (userId, groupId)
+        VALUES 
+        <foreach collection="groupMembers" item="userId" separator=",">
+            (#{userId}, #{groupId})
+        </foreach>
+    </insert>
+	
+	<select id="getGroupList" parameterType="String" resultType="GroupDto">
+		select g.groupId, g.groupName
+		from `group` g, usergrouprelationship ugr
+		where g.groupId = ugr.groupId and ugr.userId = #{userId};
+	</select>
+	
+	<select id="getGroupMemberList" parameterType="String" resultType="UserDto">
+		select userId, `name`, isAdmin, email, address
+		from user 
+		where userId in 
+		(select ugr.userId
+		from `group` g, usergrouprelationship ugr
+		where g.groupId = ugr.groupId and g.groupId = #{groupId})
+	</select>
+	
+	
+	<!--<insert id = "addUserIntoGroup" parameterType="String" useGeneratedKeys="true"
+        keyProperty="userGroupRelationshipId" keyColumn="userGroupRelationshipId">
+		insert into usergrouprelationship (userId, groupId)
+		values (#{userId}, #{groupId})
+	</insert>-->
+	
+</mapper>

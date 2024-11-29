@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssafy.enjoytrip.trip.model.mapper.TripMapper">
+
+	 <resultMap id="travel" type="SearchResponseDto">
+        <result column="content_id" property="contentId"/>
+        <result column="content_type_id" property="contentType"/>
+        <result column="title" property="title"/>
+        <result column="addr1" property="addr1"/>
+        <result column="addr2" property="addr2"/>
+        <result column="first_image" property="firstImage"/>
+        <result column="latitude" property="mapY"/>
+        <result column="longitude" property="mapX"/>
+    </resultMap>
+    
+    <resultMap id="gugun" type="GugunResponseDto">
+    	<result column="gugun_code" property="gugunCode"/>
+    	<result column="gugun_name" property="gugunName"/>
+    </resultMap>
+
+    <select id="getGugun" resultType="GugunResponseDto">
+        select gugun_code, gugun_name
+        from gugun
+        where sido_code = #{areaCode}
+    </select>
+
+    <select id="search" parameterType="searchRequestDto" resultMap="travel">
+        select content_id, content_type_id, title, addr1,addr2, first_image, latitude, longitude
+        from attraction_info
+        where sido_code = #{areaCode} and gugun_code = #{gugun}
+        and content_type_id = #{contentTypeId} and title LIKE CONCAT('%', #{keyword}, '%')
+    </select>
+    
+    <select id="getAttractionInfoByLatLng" parameterType="double" resultMap="travel">
+    	select *
+		from attraction_info
+		where latitude between #{startLat} and #{endLat} and longitude between #{startLng} and #{endLng} and content_type_id = 12
+    </select>
+    
+    
+    <insert id="makeTripPersonal" parameterType="PlanDto">
+    insert into `tour` (userId)
+    values (#{userId});
+    
+    insert into `tourPlan` (tourId, day, `order`, content_id)
+    values
+    <foreach collection="plan" item="day" index="idx1" separator=",">
+    	<foreach collection="day" item="contentId" index="idx2" separator=",">
+    		((SELECT MAX(tourId) FROM `tour`), #{idx1}+1, #{idx2}+1, #{contentId})
+    	</foreach>
+    </foreach>
+    
+    </insert>
+
+
+</mapper>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.ssafy.enjoytrip.post.model.mapper.PostMapper">
+
+	<resultMap type="postDto" id="post">
+		<result column="postId" property="postId"></result>
+		<result column="content" property="content"></result>
+		<result column="registerTime" property="registerTime"></result>
+		<result column="groupId" property="groupId"></result>
+		<result column="userId" property="userId"></result>
+		<result column="imgPath" property="imgPath"></result>
+	</resultMap>
+	
+	<resultMap type="commentDto" id="comment">
+	    <result property="commentId" column="commentId" />
+	    <result property="comment" column="comment" />
+	    <result property="registerTime" column="registerTime" />
+	    <result property="postId" column="postId" />
+	    <result property="userId" column="userId" />
+  	</resultMap>
+
+  <select id="getComments" parameterType="int" resultType="commentDto">
+   		select *
+    	from comments
+    	where postId = #{postId}
+  </select>
+	
+	<insert id="writeComment" parameterType="commentDto">
+		insert into comments (comment, registerTime, postId, userId)
+		values (#{comment}, now(), #{postId}, #{userId})
+		<selectKey resultType="int" keyProperty="commentId" order="AFTER">
+			select last_insert_id()
+		</selectKey>
+	</insert>
+	
+	<insert id="writePost" parameterType="postDto">
+		insert into post (content, registerTime, groupId, userId, title, imgPath)
+		values (#{content}, now(), #{groupId}, #{userId}, #{title}, #{imgPath})
+		<selectKey resultType="int" keyProperty="postId" order="AFTER">
+			select last_insert_id()
+		</selectKey>
+	</insert>
+	
+	<select id ="getPost" parameterType="int" resultType="postDto">
+		select *
+		from post
+		where postId = #{postId}		
+	</select>
+	
+	<select id = "listPost" resultType="postDto">
+		select *
+		from post
+		order by postId desc
+		limit 0, 10;
+	</select>
+	
+	<select id = "listPostLoad" resultType="postDto" parameterType="int">
+		select *
+		from post
+		order by postId desc
+		limit #{offset}, #{size};
+	</select>
+	
+	<select id = "searchPostList" parameterType="String" resultType="postDto">
+		select *
+		from post
+		where title LIKE CONCAT('%', #{keyword}, '%')
+		order by postId desc
+	</select>
+	
+	<update id="modifyPost" parameterType="postDto">
+		update post
+		set content = #{content}, title = #{title}
+		where postId = #{postId}
+	</update>
+	
+	<delete id="deletePost" parameterType="int">
+		delete from post
+		where postId = #{postId}
+	</delete>
+	
+	<update id="setNull" parameterType="String">
+		update post
+		set userId = null
+		where userId = #{userId}
+	</update>
+	
+</mapper>

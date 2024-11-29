@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssafy.enjoytrip.user.mapper.UserMapper">
+	<resultMap type="userDto" id="user">
+		<result column="userId" property="userId"></result>
+		<result column="name" property="name"></result>
+		<result column="password" property="password"></result>
+		<result column="isAdmin" property="isAdmin"></result>
+		<result column="email" property="email"></result>
+		<result column="address" property="address"></result>
+		<result column="token" property="token"></result>
+	</resultMap>
+	
+	<select id="login" parameterType="map" resultMap="user">
+		select userId, name, token
+		from user
+		where userId = #{userId} and password = #{password}
+	</select>
+	
+	<select id="userInfo" parameterType="string" resultMap="user">
+		select userId, name, email, isAdmin, address
+		from user
+		where userId = #{userId}
+	</select>
+	
+	<update id="saveRefreshToken" parameterType="map">
+		update user
+		set token = #{token}
+		where userId = #{userId}
+	</update>
+	
+	<select id="getRefreshToken" parameterType="string" resultType="string">
+		select token
+		from user
+		where userId = #{userId}
+	</select>
+	
+	<update id="deleteRefreshToken" parameterType="map">
+		update user
+		set token = #{token, jdbcType=VARCHAR}
+		where userId  = #{userId}
+	</update>
+	
+	
+	<select id = "listUser" resultType="userDto">
+		select *
+		from user
+	</select>
+	
+	<insert id = "joinUser" parameterType="userDto">
+		insert into user (userId, name, password, isAdmin, email, address)
+		values (#{userId}, #{name}, #{password}, #{isAdmin}, #{email}, #{address})
+	</insert>
+	
+	<update id="modifyUser" parameterType="userDto">
+    	update user
+    	set address = #{address}, password = #{password}
+    	where userId = #{userId}
+	</update>
+	
+	<delete id="deleteUser" parameterType="String">
+		delete from user
+		where userId = #{userId}		
+	</delete>
+	
+	<select id ="getTour" parameterType="String" resultType="Integer">
+		select tourId
+		from tour
+		where userId = #{userId}
+	</select>
+	
+	
+</mapper>
